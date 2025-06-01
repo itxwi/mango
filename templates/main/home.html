@@ -1,10 +1,147 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Django Site</title>
+    <title>itxsite</title>
 </head>
+
+<style>
+    h1 {
+        font-family: "Comic Sans MS";
+    }
+    h2 {
+        font-family: monospace;
+    }
+    body {
+        background-color: beige;
+    }
+    br {
+        line-height: 2;
+    }
+    .special-button {
+        background-color: aliceblue;
+        cursor: pointer;
+        border: 5px dotted;
+        width: 100%;
+
+    }
+    .special-button:hover {
+        background-color: rgb(109, 255, 109);
+    }
+
+    #tomato-button{
+        background-color: red;
+        width: 100%;
+    }
+    #tomato-button:hover{
+        background-color: rgb(200, 0, 0);
+        color: white;
+    }
+
+    #other-button {
+        background-color: rgb(109, 255, 109);
+        width: 100%;
+        font-family: "Comic Sans MS";
+    } 
+
+    #other-button:hover{
+        background-color: rgb(72, 175, 72);
+        color: white;
+    }
+    .overallcontainer {
+        width: 100%;
+        display: flex;
+
+    }
+    
+    .tomatocontainer {
+        display: flex;
+        align-items:center;
+        width: 50%;
+    }
+    .tomatocontainer img{
+        width: 100px;
+        height: auto;
+    }
+    .showdiv {
+        display: none;
+    }
+</style>
 <body>
-    <h1><strong>Hello, welcome to my site!</strong></h1>
-    <p>This is a full HTML page served by Django.</p>
+    <h1>whats up welcome to my site</h1>
+    <h2>my name is itxwill, and im on the interweb now. i dislike tomatos and i like to rollerblade</h2>
+    <button class="special-button" onclick="handleClick()" id="im special"><h1>click me!!!!!</h1></button>
+    <div class="showdiv" id="option1">
+    <h2>ok it works. time to vote</h2>
+    <br>
+    <br>
+    <div class="overallcontainer">
+        <div class="tomatocontainer">
+            <button value="tomato" id="tomato-button" onclick="onVote('tomato')"><h1>tomatos </h1></button>  
+        </div>
+        <div class="tomatocontainer">
+            <button  value="not_tomato" id="other-button" onclick="onVote('not tomato')"><h1>not tomatoes</h1></button>
+        </div>
+    </div>
+    <div class="showdiv" id="option2">
+        <br>
+        <br>
+        <br>
+        <h1 id="tomato-count">votes tomatoes: {{ tomato_count }}</h1>
+        <h1 id="not-tomato-count">votes not tomatoes: {{ not_tomato_count }}</h1>
+    </div>
 </body>
+<script>
+    const audio = new Audio("{% static 'main/happy.mp3' %}")
+    function handleClick(){
+        alert('are you sure about that?')
+        console.log(document.cookie) 
+        document.getElementById("option1").style.display="block";
+        document.getElementById("option2").style.display="block";
+        document.getElementById("im special").style.pointerEvents="none";
+        audio.play();
+    }
+
+        function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function onVote(option){
+        document.getElementById("tomato-button").style.pointerEvents="none";
+        document.getElementById("other-button").style.pointerEvents="none";
+        
+        //const csrftoken = getCookie('csrftoken');
+        try {
+            const response = await fetch("{% url 'vote' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({ vote: option })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('tomato-count').innerText = `votes tomatoes: ${data.tomato_count}`;
+                document.getElementById('not-tomato-count').innerText = `votes not tomatoes: ${data.not_tomato_count}`;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
+<noscript>
+    <h1>you arent invited to play in my game. :( </h1>
+</noscript>
 </html>
